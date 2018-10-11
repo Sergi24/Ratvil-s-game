@@ -37,8 +37,6 @@ public static class Players {
 
     public static int GetNextSlot(int numPlayer)
     {
-        if (position[numPlayer] + direction[numPlayer] > 69) return 0;
-        else if (position[numPlayer] + direction[numPlayer] < 0) return 68;
-        else return position[numPlayer]+direction[numPlayer]; 
+        return Map.GetNextSlot(position[numPlayer], direction[numPlayer]);
     }
 }

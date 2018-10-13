@@ -45,14 +45,12 @@ public class CameraController : MonoBehaviour
 
     public void MoveCameraLookPlayerTurn()
     {
-        Debug.Log("MoveCameraLookPlayerTurn");
         StopAllCoroutines();
         SetFollowCurrentPlayer(true);
     }
 
     public void MoveCameraLookDestination(Vector3 position, GameObject destination)
     {
-        Debug.Log("MoveCameraLookDestination");
         SetFollowCurrentPlayer(false);
         StopAllCoroutines();
         StartCoroutine(MoveCameraLookDestinationCoroutine(position, destination));
@@ -70,7 +68,6 @@ public class CameraController : MonoBehaviour
 
     public void MoveCameraRotation(Vector3 position, Vector3 rotation)
     {
-        Debug.Log("MoveCameraRotation");
         SetFollowCurrentPlayer(false);
         StopAllCoroutines();
         StartCoroutine(MoveCameraRotationEulerCoroutine(position, rotation));

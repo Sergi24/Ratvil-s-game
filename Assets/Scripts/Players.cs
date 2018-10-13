@@ -2,17 +2,25 @@
 public static class Players {
     private static int[] position;
     private static int[] direction;
+    private static int[] haddocks;
 
-    public static void SetPlayersInitialPosition()
+    public static void InitializatePlayers()
     {
         position = new int[4];
         direction = new int[4];
+        haddocks = new int[4];
 
         for (int numPlayer = 0; numPlayer < 4; numPlayer++)
         {
             position[numPlayer] = 0;
-            direction[numPlayer] = 1;
+            direction[numPlayer] = -1;
+            haddocks[numPlayer] = 0;
         }
+    }
+
+    public static void AddHaddocks(int numPlayer, int amount)
+    {
+        haddocks[numPlayer] += amount;
     }
 
     public static void SetCurrentSlot(int numPlayer, int currentSlot)

@@ -19,7 +19,7 @@ public class Game : MonoBehaviour {
 
     public Text textMovements;
 
-    private GameObject currentDiceStructure;
+    private GameObject currentDiceStructure, lastSpotlightNextSlot;
 
     private int playerTurn;
 
@@ -139,9 +139,9 @@ public class Game : MonoBehaviour {
             Vector3 nextSlotPosition = Map.GetSlotPosition(Players.GetNextSlot(numPlayer));
             while ((player.transform.position - new Vector3(nextSlotPosition.x, player.transform.position.y, nextSlotPosition.z)).magnitude > 2)
             {
-                player.transform.rotation = Quaternion.Slerp(player.transform.rotation, Quaternion.LookRotation(new Vector3(nextSlotPosition.x, player.transform.position.y, nextSlotPosition.z) - player.transform.position), playersRotation * Time.deltaTime);
-                player.transform.Translate(Vector3.forward * 20 * playersVelocity * Time.deltaTime);
-                yield return new WaitForSeconds(0.02f);
+                player.transform.rotation = Quaternion.Slerp(player.transform.rotation, Quaternion.LookRotation(new Vector3(nextSlotPosition.x, player.transform.position.y, nextSlotPosition.z) - player.transform.position), playersRotation*0.05f);
+                player.transform.Translate(Vector3.forward * playersVelocity);
+                yield return new WaitForSeconds(0.025f);
             }
             Players.SetCurrentSlot(numPlayer, Players.GetNextSlot(numPlayer));
             i++;
@@ -234,7 +234,13 @@ public class Game : MonoBehaviour {
             textMovements.text = nextSlotMovements.ToString();
             nextSlotVisualization = Map.GetNextSlot(nextSlotVisualization, nextSlotVisualizationDirection * direction);
             Vector3 nextSlotVisualizationPosition = Map.GetSlotPosition(nextSlotVisualization);
-            gameCamera.GetComponent<CameraController>().MoveCameraRotation(new Vector3(nextSlotVisualizationPosition.x, nextSlotVisualizationPosition.y + 100, nextSlotVisualizationPosition.z), new Vector3(90, 0, 0));
+            gameCamera.GetComponent<CameraController>().MoveCameraRotation(new Vector3(nextSlotVisualizationPosition.x, nextSlotVisualizationPosition.y + 200, nextSlotVisualizationPosition.z), new Vector3(90, 0, 0));
+
+            if (lastSpotlightNextSlot != null)
+            {
+                Destroy(lastSpotlightNextSlot);
+            }
+            lastSpotlightNextSlot = Instantiate(spotlight, new Vector3(nextSlotVisualizationPosition.x, nextSlotVisualizationPosition.y + 12f, nextSlotVisualizationPosition.z), spotlight.transform.rotation);
         }
     }
 }

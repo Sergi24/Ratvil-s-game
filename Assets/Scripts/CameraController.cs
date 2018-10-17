@@ -60,7 +60,7 @@ public class CameraController : MonoBehaviour
     {
         while ((position - transform.position).magnitude > 1)
         {
-            transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation((destination.transform.position - transform.position)), cameraRotation * Time.deltaTime);
+            transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation((destination.transform.position - transform.position)), cameraRotation * 0.05f);
             transform.position = transform.position + ((position - transform.position) * cameraVelocity / 50f);
             yield return new WaitForSeconds(0.02f);
         }
@@ -77,7 +77,7 @@ public class CameraController : MonoBehaviour
     {
         while ((position - transform.position).magnitude > 1)
         {
-            transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.Euler(rotation), cameraRotation * Time.deltaTime);
+            transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.Euler(rotation), cameraRotation * 0.05f);
             transform.position = transform.position + ((position - transform.position) * cameraVelocity / 50f);
             yield return new WaitForSeconds(0.02f);
         }

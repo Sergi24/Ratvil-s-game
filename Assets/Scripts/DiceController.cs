@@ -6,6 +6,21 @@ using UnityEngine;
 public class DiceController : MonoBehaviour {
 
     private int diceNumber;
+    private Rigidbody rb;
+
+    private void Start()
+    {
+        rb = gameObject.GetComponent<Rigidbody>();
+    }
+
+    public void ThrowDice()
+    {
+        rb.useGravity = true;
+        rb.AddForce(Vector3.up * UnityEngine.Random.Range(20, 35), ForceMode.Impulse);
+        rb.AddTorque((Vector3.right * UnityEngine.Random.Range(-300, 300) + Vector3.up * UnityEngine.Random.Range(-300, 300) + Vector3.forward * UnityEngine.Random.Range(-300, 300)), ForceMode.Impulse);
+        StartCoroutine(DiceThrown());
+       // Invoke("DownForce", 2f);
+    }
 
     public IEnumerator DiceThrown()
     {
@@ -24,16 +39,66 @@ public class DiceController : MonoBehaviour {
 
     private int WriteDiceNumber()
     {
-        if (CheckRotation(90, -1, -1)) return 2;
-        else if (CheckRotation(0, -1, 90)) return 6;
-        else if (CheckRotation(180, -1, 270)) return 6;
-        else if (CheckRotation(270, -1, -1)) return 4;
-        else if (CheckRotation(0, -1, 180)) return 3;
-        else if (CheckRotation(180, -1, 0)) return 3;
-        else if (CheckRotation(0, -1, 0)) return 1;
-        else if (CheckRotation(180, -1, 180)) return 1;
-        else if (CheckRotation(0, -1, 270)) return 5;
-        else if (CheckRotation(180, -1, 90)) return 5;
+        if (CheckRotation(90, -1, -1))
+        {
+            if (gameObject.name.Equals("Dice")) return 2;
+            else if (gameObject.name.Equals("Dice13")) return 2;
+            else return 5;
+        }
+        else if (CheckRotation(0, -1, 90))
+        {
+            if (gameObject.name.Equals("Dice")) return 6;
+            else if (gameObject.name.Equals("Dice13")) return 3;
+            else return 6;
+        }
+        else if (CheckRotation(180, -1, 270))
+        {
+            if (gameObject.name.Equals("Dice")) return 6;
+            else if (gameObject.name.Equals("Dice13")) return 3;
+            else return 6;
+        }
+        else if (CheckRotation(270, -1, -1))
+        {
+            if (gameObject.name.Equals("Dice")) return 4;
+            else if (gameObject.name.Equals("Dice13")) return 2;
+            else return 5;
+        }
+        else if (CheckRotation(0, -1, 180))
+        {
+            if (gameObject.name.Equals("Dice")) return 3;
+            else if (gameObject.name.Equals("Dice13")) return 1;
+            else return 4;
+        }
+        else if (CheckRotation(180, -1, 0))
+        {
+            if (gameObject.name.Equals("Dice")) return 3;
+            else if (gameObject.name.Equals("Dice13")) return 1;
+            else return 4;
+        }
+        else if (CheckRotation(0, -1, 0))
+        {
+            if (gameObject.name.Equals("Dice")) return 1;
+            else if (gameObject.name.Equals("Dice13")) return 1;
+            else return 4;
+        }
+        else if (CheckRotation(180, -1, 180))
+        {
+            if (gameObject.name.Equals("Dice")) return 1;
+            else if (gameObject.name.Equals("Dice13")) return 1;
+            else return 4;
+        }
+        else if (CheckRotation(0, -1, 270))
+        {
+            if (gameObject.name.Equals("Dice")) return 5;
+            else if (gameObject.name.Equals("Dice13")) return 3;
+            else return 6;
+        }
+        else if (CheckRotation(180, -1, 90))
+        {
+            if (gameObject.name.Equals("Dice")) return 5;
+            else if (gameObject.name.Equals("Dice13")) return 3;
+            else return 6;
+        }
         else return 6;
     }
 
@@ -61,5 +126,11 @@ public class DiceController : MonoBehaviour {
     {
         GameObject.Find("Game").GetComponent<Game>().DestroyDiceStructure();
         GameObject.Find("Game").GetComponent<Game>().MovePlayer(diceNumber, false);
+    }
+
+    private void DownForce()
+    {
+        Debug.Log("ARA");
+        rb.AddForce(Vector3.down * 125f, ForceMode.Impulse);
     }
 }

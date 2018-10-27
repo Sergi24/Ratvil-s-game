@@ -1,9 +1,7 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
-public class BoxController : MonoBehaviour {
-
+public class BoxController : MonoBehaviour
+{
     private Game game;
 
     private void Start()
@@ -19,11 +17,11 @@ public class BoxController : MonoBehaviour {
             gameObject.GetComponent<CapsuleCollider>().enabled = false;
             gameObject.GetComponent<ParticleSystem>().Emit(200);
             game.AddItem();
-            Invoke("SetBoxVisible", 2f);
+            Invoke("SetVisibleBox", 2f);
         }
     }
 
-    private void SetBoxVisible()
+    private void SetVisibleBox()
     {
         gameObject.GetComponent<MeshRenderer>().enabled = true;
         gameObject.GetComponent<CapsuleCollider>().enabled = true;

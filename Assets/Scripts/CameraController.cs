@@ -1,62 +1,68 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class CameraController : MonoBehaviour
 {
     public int cameraRotation, cameraVelocity;
 
-    private bool followCurrentPlayer, inPosition;
+    private bool currentPlayer, positioned;
     private Game game;
 
-    // Use this for initialization
-    void Start () {
+    private void Start()
+    {
         game = GameObject.Find("Game").GetComponent<Game>();
-        SetFollowCurrentPlayer(true);
+        SetCurrentPlayer(true);
     }
-	
-	// Update is called once per frame
-	void Update () {
-		if (followCurrentPlayer)
+
+    private void Update()
+    {
+        if (currentPlayer)
         {
-            if (!inPosition)
+            if (!positioned)
             {
                 transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(game.GetCurrentPlayer().transform.position - transform.position), cameraRotation * Time.deltaTime);
 
-                Vector3 position = game.GetCameraPlayerPosition().transform.localPosition;
+                Vector3 position = game.GetPlayersPositionCamera().transform.localPosition;
                 transform.localPosition = transform.localPosition + ((position - transform.localPosition) * Time.deltaTime);
 
                 if ((position - transform.localPosition).magnitude < 0.2f)
                 {
-                    inPosition = true;
+                    positioned = true;
                 }
                 //Debug.Log((position - transform.localPosition).magnitude);
             }
         }
-	}
-
-    public void SetFollowCurrentPlayer(bool variable)
-    {
-        if (!variable) transform.SetParent(null);
-        else transform.SetParent(game.GetCurrentPlayer().transform);
-        followCurrentPlayer = variable;
-        inPosition = false;
     }
 
-    public void MoveCameraLookPlayerTurn()
+    public void SetCurrentPlayer(bool variable)
+    {
+        if (!variable)
+        {
+            transform.SetParent(null);
+        }
+        else
+        {
+            transform.SetParent(game.GetCurrentPlayer().transform);
+        }
+
+        currentPlayer = variable;
+        positioned = false;
+    }
+
+    public void SetPlayersTurn()
     {
         StopAllCoroutines();
-        SetFollowCurrentPlayer(true);
+        SetCurrentPlayer(true);
     }
 
-    public void MoveCameraLookDestination(Vector3 position, GameObject destination)
+    public void Locate(Vector3 position, GameObject destination)
     {
-        SetFollowCurrentPlayer(false);
+        SetCurrentPlayer(false);
         StopAllCoroutines();
-        StartCoroutine(MoveCameraLookDestinationCoroutine(position, destination));
+        StartCoroutine(LocateCoroutine(position, destination));
     }
 
-    private IEnumerator MoveCameraLookDestinationCoroutine(Vector3 position, GameObject destination)
+    private IEnumerator LocateCoroutine(Vector3 position, GameObject destination)
     {
         while ((position - transform.position).magnitude > 1)
         {
@@ -66,14 +72,14 @@ public class CameraController : MonoBehaviour
         }
     }
 
-    public void MoveCameraRotation(Vector3 position, Vector3 rotation)
+    public void Rotate(Vector3 position, Vector3 rotation)
     {
-        SetFollowCurrentPlayer(false);
+        SetCurrentPlayer(false);
         StopAllCoroutines();
-        StartCoroutine(MoveCameraRotationEulerCoroutine(position, rotation));
+        StartCoroutine(RotateEulerCoroutine(position, rotation));
     }
 
-    private IEnumerator MoveCameraRotationEulerCoroutine(Vector3 position, Vector3 rotation)
+    private IEnumerator RotateEulerCoroutine(Vector3 position, Vector3 rotation)
     {
         while ((position - transform.position).magnitude > 1)
         {

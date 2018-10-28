@@ -2,7 +2,8 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public enum Item{
+public enum Item
+{
     Empty,
     Dice13,
     Dice46,
@@ -14,7 +15,8 @@ public enum Item{
 }
 
 
-public static class Players {
+public static class Players
+{
     private static int[] position;
     private static int[] direction;
     private static int[] haddocks;
@@ -40,7 +42,7 @@ public static class Players {
             direction[numPlayer] = 1;
             haddocks[numPlayer] = 0;
 
-            for(int numItem = 0; numItem < 3; numItem++)
+            for (int numItem = 0; numItem < 3; numItem++)
             {
                 items[numPlayer, numItem] = Item.Empty;
             }
@@ -63,11 +65,14 @@ public static class Players {
             if (items[numPlayer, i].Equals(Item.Empty))
             {
                 items[numPlayer, i] = item;
-                buttonsItems[i].GetComponent<Image>().enabled = true;
-                if (item.Equals(Item.Dice13)) buttonsItems[i].GetComponent<Image>().color = new Color(1, 0.5f, 0);
-                else if (item.Equals(Item.Dice46)) buttonsItems[i].GetComponent<Image>().color = Color.gray;
-                else if (item.Equals(Item.BigTrap)) buttonsItems[i].GetComponent<Image>().color = Color.cyan;
-                else buttonsItems[i].GetComponent<Image>().color = Color.white;
+                if (numPlayer == 0)
+                {
+                    buttonsItems[i].GetComponent<Image>().enabled = true;
+                    if (item.Equals(Item.Dice13)) buttonsItems[i].GetComponent<Image>().color = new Color(1, 0.5f, 0);
+                    else if (item.Equals(Item.Dice46)) buttonsItems[i].GetComponent<Image>().color = Color.gray;
+                    else if (item.Equals(Item.BigTrap)) buttonsItems[i].GetComponent<Image>().color = Color.cyan;
+                    else buttonsItems[i].GetComponent<Image>().color = Color.white;
+                }
                 numItems[numPlayer]++;
                 found = true;
                 Debug.Log(item.ToString());
@@ -86,10 +91,20 @@ public static class Players {
         return items[numPlayer, numItem];
     }
 
+    public static Item[] GetItems(int numPlayer)
+    {
+        Item[] items = new Item[3];
+        for (int i = 0; i < 3; i++)
+        {
+            items[i] = GetItem(numPlayer, i);
+        }
+        return items;
+    }
+
     public static void EliminateItem(int numPlayer, int numItem)
     {
         items[numPlayer, numItem] = Item.Empty;
-        buttonsItems[numItem].GetComponent<Image>().enabled = false;
+        if (numPlayer == 0) buttonsItems[numItem].GetComponent<Image>().enabled = false;
         numItems[numPlayer]--;
     }
 

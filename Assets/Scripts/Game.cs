@@ -10,7 +10,8 @@ public enum DiceType
     Dice46
 }
 
-public class Game : MonoBehaviour {
+public class Game : MonoBehaviour
+{
 
     public GameObject[] players;
     public GameObject[] cameraPlayerPosition;
@@ -19,21 +20,19 @@ public class Game : MonoBehaviour {
     public float playersVelocity, playersRotation;
     public GameObject gameCamera, spotlight;
 
-    public GameObject optionThrow;
-
     public GameObject diceStructure, diceStructure13, diceStructure46;
     public GameObject bigTrap, bigTrapSprite, hammer, hammerSprite;
 
     public Color colorBlueSpotlight, colorRedSpotlight;
     public Material materialSoftGrey, materialPink;
 
-    public GameObject textMovements;
-
     private GameObject currentDiceStructure, currentDice, lastSpotlightNextSlot;
     private int currentItemSelected;
     private DiceType currentDiceStructureType;
 
+    private int numPlayers;
     private int playerTurn;
+
     private int probDice13 = 15,
                 probDice46 = 15,
                 probTrap = 55,
@@ -49,8 +48,10 @@ public class Game : MonoBehaviour {
 
     private int nextSlotVisualization, nextSlotVisualizationDirection, nextSlotMovements;
 
+    private UI ui;
+
     // Use this for initialization
-    void Start ()
+    void Start()
     {
         Map.InitializeSquares();
         mapGeneralView = false;
@@ -58,6 +59,80 @@ public class Game : MonoBehaviour {
         playerTurn = 0;
         PrepareDiceThrow();
         currentItemSelected = -1;
+        numPlayers = 2;
+
+        ui = gameObject.GetComponent<UI>();
+    }
+
+    public IEnumerator ChangeTurn()
+    {
+        ui.ShowOptionThrow(false);
+        ui.ShowOptionItems(false);
+        yield return new WaitForSeconds(1f);
+        gameCamera.GetComponent<CameraController>().MoveCameraRotation(GameObject.Find("MapGeneralView").transform.position, new Vector3(87, 291, -68));
+        yield return new WaitForSeconds(1f);
+        playerTurn = (playerTurn + 1) % numPlayers;
+
+        PrepareDiceThrow();
+
+        gameCamera.GetComponent<CameraController>().MoveCameraLookPlayerTurn();
+
+        if (playerTurn != 0) StartCoroutine(AIturn());
+        else
+        {
+            ui.ShowOptionThrow(true);
+            ui.ShowOptionItems(true);
+        }
+    }
+
+    public IEnumerator AIturn()
+    {
+        yield return new WaitForSeconds(3f);
+
+        if (AIchooseDice()) yield return new WaitForSeconds(1f);
+
+        ButtonThrowDice();
+    }
+
+    public bool AIchooseDice()
+    {
+        if (Random.Range(0, 2) == 0)
+        {
+            Item[] items = Players.GetItems(playerTurn);
+            int randNum = Random.Range(0, 3);
+            for (int i = randNum; i < randNum + 3; i++)
+            {
+                if (items[i % 3].Equals(Item.Dice13) || items[i % 3].Equals(Item.Dice46))
+                {
+                    ButtonItem(i % 3);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public void AIchooseDirection()
+    {
+        if (Random.Range(0, 2) == 0) ButtonLeftDirection();
+        else ButtonRightDirection();
+    }
+
+    public void AIchooseItem()
+    {
+        if (Random.Range(0, 2) == 0)
+        {
+            Item[] items = Players.GetItems(playerTurn);
+            int randNum = Random.Range(0, 3);
+            for (int i = randNum; i < randNum + 3; i++)
+            {
+                if (!items[i % 3].Equals(Item.Empty) && !items[i % 3].Equals(Item.Dice13) && !items[i % 3].Equals(Item.Dice46))
+                {
+                    ButtonItem(i % 3);
+                    break;
+                }
+            }
+        }
     }
 
     public int GetPlayerTurn()
@@ -88,7 +163,7 @@ public class Game : MonoBehaviour {
     {
         optionChooseDirection.SetActive(false);
         RemoveAllSpotlights();
-        Players.SetCurrentSlot(playerTurn, Map.rightSquare + (Map.rightDirection*-1));
+        Players.SetCurrentSlot(playerTurn, Map.rightSquare + (Map.rightDirection * -1));
         Players.SetCurrentDirection(playerTurn, Map.rightDirection);
         MovePlayer(0, true);
     }
@@ -109,7 +184,6 @@ public class Game : MonoBehaviour {
 
     public void PrepareDiceThrow()
     {
-        optionThrow.SetActive(true);
         DestroyDiceStructure();
         CreateDiceStructure(DiceType.Dice16);
         nextSlotVisualization = Players.GetCurrentSquare(playerTurn);
@@ -136,17 +210,6 @@ public class Game : MonoBehaviour {
         if (currentDiceStructure != null) Destroy(currentDiceStructure);
     }
 
-    public void HideTextMovements()
-    {
-        textMovements.SetActive(false);
-    }
-
-    public void WriteTextMovements(int movements)
-    {
-        textMovements.SetActive(true);
-        textMovements.GetComponent<Text>().text = movements.ToString();
-    }
-
     public void MovePlayer(int movements, bool thereAreRemainingMovements)
     {
         gameCamera.GetComponent<CameraController>().MoveCameraLookPlayerTurn();
@@ -167,16 +230,20 @@ public class Game : MonoBehaviour {
         Vector3 translation = Vector3.forward * playersVelocity;
         while (i < numSlots)
         {
-            textMovements.SetActive(true);
-            textMovements.GetComponent<Text>().text = (numSlots - i).ToString();
+            ui.textMovements.SetActive(true);
+            ui.textMovements.GetComponent<Text>().text = (numSlots - i).ToString();
             if (thereAreRemainingMovements) thereAreRemainingMovements = false;
             else if (Map.IsNeedToChooseDirection(Players.GetCurrentSquare(numPlayer), Players.GetCurrentDirection(numPlayer)))
             {
-                optionChooseDirection.SetActive(true);
                 remainingMovements = numSlots - i;
-                SpotlightSlots(Players.GetCurrentSquare(numPlayer), Players.GetCurrentDirection(numPlayer));
-                gameCamera.GetComponent<CameraController>().MoveCameraLookDestination(new Vector3(player.transform.position.x, player.transform.position.y + 120, player.transform.position.z), player.transform.Find("GeneralView").gameObject);
-                Map.IsNeedToChooseDirection(Players.GetCurrentSquare(numPlayer), Players.GetCurrentDirection(numPlayer));
+                if (numPlayer == 0)
+                {
+                    optionChooseDirection.SetActive(true);
+                    SpotlightSlots(Players.GetCurrentSquare(numPlayer), Players.GetCurrentDirection(numPlayer));
+                    gameCamera.GetComponent<CameraController>().MoveCameraLookDestination(new Vector3(player.transform.position.x, player.transform.position.y + 120, player.transform.position.z), player.transform.Find("GeneralView").gameObject);
+                    Map.IsNeedToChooseDirection(Players.GetCurrentSquare(numPlayer), Players.GetCurrentDirection(numPlayer));
+                }
+                else AIchooseDirection();
                 break;
             }
             Vector3 nextSlotPosition = Map.GetSquarePosition(Players.GetNextSquare(numPlayer));
@@ -190,17 +257,22 @@ public class Game : MonoBehaviour {
             i++;
             if (i == numSlots)
             {
-                textMovements.SetActive(true);
-                textMovements.GetComponent<Text>().text = "0";
-                PrepareDiceThrow();
+                ui.textMovements.SetActive(true);
+                ui.textMovements.GetComponent<Text>().text = "0";
                 if (Map.GetSquareType(Players.GetCurrentSquare(playerTurn)).Equals(SquareType.Trap))
                 {
-                    StartCoroutine(TrapController(Players.GetCurrentSquare(playerTurn)));
+                    yield return StartCoroutine(TrapController(Players.GetCurrentSquare(playerTurn)));
                 }
                 else if (Map.GetSquareType(Players.GetCurrentSquare(playerTurn)).Equals(SquareType.BigTrap))
                 {
-                    StartCoroutine(BigTrapController(Players.GetCurrentSquare(playerTurn)));
+                    yield return StartCoroutine(BigTrapController(Players.GetCurrentSquare(playerTurn)));
                 }
+                if (playerTurn != 0)
+                {
+                    yield return new WaitForSeconds(1f);
+                    AIchooseItem();
+                }
+                StartCoroutine(ChangeTurn());
             }
         }
     }
@@ -226,7 +298,8 @@ public class Game : MonoBehaviour {
         {
             if (remainingSlot.Count == 1) color = colorBlueSpotlight;
             moves = movements[0];
-            while (moves > 0) {
+            while (moves > 0)
+            {
                 Vector3 position = Map.GetSquarePosition(remainingSlot[0]);
                 GameObject spotlightInstantiated = Instantiate(spotlight, new Vector3(position.x, position.y + 12f, position.z), spotlight.transform.rotation);
                 spotlightInstantiated.GetComponent<Light>().color = color;
@@ -254,7 +327,7 @@ public class Game : MonoBehaviour {
 
     public void RemoveAllSpotlights()
     {
-        foreach(GameObject spotlight in GameObject.FindGameObjectsWithTag("Spotlight"))
+        foreach (GameObject spotlight in GameObject.FindGameObjectsWithTag("Spotlight"))
         {
             Destroy(spotlight);
         }
@@ -270,12 +343,11 @@ public class Game : MonoBehaviour {
 
         currentDice.GetComponent<DiceController>().ThrowDice();
 
-        optionThrow.SetActive(false);
+        ui.ShowOptionThrow(false);
+        ui.ShowTextMovements(false);
 
-        HideTextMovements();
+        gameCamera.GetComponent<CameraController>().MoveCameraLookDestination(new Vector3(currentDice.transform.position.x, currentDice.transform.position.y + 30, currentDice.transform.position.z), currentDice);
 
-        gameCamera.GetComponent<CameraController>().MoveCameraLookDestination(new Vector3(currentDice.transform.position.x, currentDice.transform.position.y + 20, currentDice.transform.position.z), currentDice);
-        
     }
 
     public void ButtonNextSlot(int direction)
@@ -287,8 +359,8 @@ public class Game : MonoBehaviour {
         else
         {
             nextSlotMovements += direction;
-            textMovements.SetActive(true);
-            textMovements.GetComponent<Text>().text = nextSlotMovements.ToString();
+            ui.textMovements.SetActive(true);
+            ui.textMovements.GetComponent<Text>().text = nextSlotMovements.ToString();
             nextSlotVisualization = Map.GetNextSquare(nextSlotVisualization, nextSlotVisualizationDirection * direction);
             Vector3 nextSlotVisualizationPosition = Map.GetSquarePosition(nextSlotVisualization);
             gameCamera.GetComponent<CameraController>().MoveCameraRotation(new Vector3(nextSlotVisualizationPosition.x, nextSlotVisualizationPosition.y + 200, nextSlotVisualizationPosition.z), new Vector3(90, 0, 0));
@@ -341,8 +413,8 @@ public class Game : MonoBehaviour {
             int currentSquareNum = Players.GetCurrentSquare(playerTurn);
             if (Map.GetSquareType(currentSquareNum).Equals(SquareType.Empty))
             {
-                Instantiate(hammerSprite, Map.GetSquarePosition(currentSquareNum), Map.GetSquare(currentSquareNum).transform.rotation).transform.SetParent(Map.GetSquare(currentSquareNum).transform); 
-                Instantiate(hammer, GetCurrentPlayer().transform.position + new Vector3(0, -2, 0), GetCurrentPlayer().transform.rotation).transform.SetParent(Map.GetSquare(currentSquareNum).transform); 
+                Instantiate(hammerSprite, Map.GetSquarePosition(currentSquareNum), Map.GetSquare(currentSquareNum).transform.rotation).transform.SetParent(Map.GetSquare(currentSquareNum).transform);
+                Instantiate(hammer, GetCurrentPlayer().transform.position + new Vector3(0, -2, 0), GetCurrentPlayer().transform.rotation).transform.SetParent(Map.GetSquare(currentSquareNum).transform);
                 Map.AddItemToSquare(currentSquareNum, Item.Trap);
                 Map.GetSquare(currentSquareNum).GetComponent<MeshRenderer>().material.color = materialSoftGrey.color;
 
@@ -354,8 +426,8 @@ public class Game : MonoBehaviour {
             int currentSquareNum = Players.GetCurrentSquare(playerTurn);
             if (Map.GetSquareType(currentSquareNum).Equals(SquareType.Empty))
             {
-                Instantiate(bigTrapSprite, Map.GetSquarePosition(currentSquareNum), Map.GetSquare(currentSquareNum).transform.rotation).transform.SetParent(Map.GetSquare(currentSquareNum).transform); 
-                Instantiate(bigTrap, Map.GetSquarePosition(currentSquareNum), GetCurrentPlayer().transform.rotation).transform.SetParent(Map.GetSquare(currentSquareNum).transform); 
+                Instantiate(bigTrapSprite, Map.GetSquarePosition(currentSquareNum), Map.GetSquare(currentSquareNum).transform.rotation).transform.SetParent(Map.GetSquare(currentSquareNum).transform);
+                Instantiate(bigTrap, Map.GetSquarePosition(currentSquareNum), GetCurrentPlayer().transform.rotation).transform.SetParent(Map.GetSquare(currentSquareNum).transform);
                 Map.AddItemToSquare(currentSquareNum, Item.BigTrap);
                 Map.GetSquare(currentSquareNum).GetComponent<MeshRenderer>().material.color = materialSoftGrey.color;
 
@@ -385,7 +457,7 @@ public class Game : MonoBehaviour {
         GameObject trapInstantiated = Map.GetSquare(numSquare).transform.GetChild(1).GetChild(0).gameObject;
         while (trapInstantiated.transform.rotation.eulerAngles.z < 90)
         {
-            trapInstantiated.transform.Rotate(Vector3.forward*5);
+            trapInstantiated.transform.Rotate(Vector3.forward * 5);
             yield return new WaitForSeconds(0.02f);
         }
         yield return new WaitForSeconds(0.5f);

@@ -32,7 +32,7 @@ public class DiceController : MonoBehaviour {
 
         diceNumber = WriteDiceNumber();
 
-        GameObject.Find("Game").GetComponent<Game>().WriteTextMovements(diceNumber);
+        GameObject.Find("Game").GetComponent<UI>().WriteTextMovements(diceNumber);
 
         Invoke("MovePlayerTime", 2f);
     }

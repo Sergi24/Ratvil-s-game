@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public enum SquareType
 {
@@ -9,50 +7,58 @@ public enum SquareType
     BigTrap
 }
 
-
-public static class Map {
-
+public static class Map
+{
     public static int rightSquare, leftSquare, rightDirection, leftDirection;
 
-    private static GameObject[] squares;
-    private static SquareType[] squaresType;
-    private static GameObject objects;
+    private static GameObject[] Squares;
+    private static SquareType[] squareTypes;
+    private static readonly GameObject Objects;
 
     public static void InitializeSquares()
     {
-        squares = new GameObject[69];
-        squaresType = new SquareType[69];
+        Squares = new GameObject[69];
+        squareTypes = new SquareType[69];
 
-        for (int i = 0; i< squares.Length; i++)
+        for (int i = 0; i < Squares.Length; i++)
         {
-            squares[i] = GameObject.Find(string.Concat("ReceptionSlot", i));
-            squaresType[i] = SquareType.Empty;
+            Squares[i] = GameObject.Find(string.Concat("ReceptionSlot", i));
+            squareTypes[i] = SquareType.Empty;
         }
     }
 
-    public static GameObject GetSquare(int numSquare)
+    public static GameObject GetSquare(int squareNum)
     {
-        return squares[numSquare];
+        return Squares[squareNum];
     }
 
-    public static Vector3 GetSquarePosition(int numSquare)
+    public static Vector3 GetSquarePosition(int squareNum)
     {
-        return squares[numSquare].transform.position;
+        return Squares[squareNum].transform.position;
     }
 
-    public static SquareType GetSquareType(int numSquare)
+    public static SquareType GetSquareType(int squareNum)
     {
-        return squaresType[numSquare];
+        return squareTypes[squareNum];
     }
 
     public static int GetNextSquare(int position, int direction)
     {
-        if (position + direction > 68) return 0;
-        else if (position + direction < 0) return 68;
-        else return position + direction;
+        if (position + direction > 68)
+        {
+            return 0;
+        }
+        else if (position + direction < 0)
+        {
+            return 68;
+        }
+        else
+        {
+            return position + direction;
+        }
     }
 
-    public static bool IsNeedToChooseDirection(int position, int direction)
+    public static bool mustChooseDirection(int position, int direction)
     {
         if (position == 6 && direction == 1)
         {
@@ -150,23 +156,26 @@ public static class Map {
             leftDirection = 1;
             return true;
         }
-        else return false;
+        else
+        {
+            return false;
+        }
     }
 
-    public static void AddItemToSquare(int numSquare, Item item)
+    public static void AddItemToSquare(int squareNum, Item item)
     {
         if (item.Equals(Item.Trap))
         {
-            squaresType[numSquare] = SquareType.Trap;
+            squareTypes[squareNum] = SquareType.Trap;
         }
         else if (item.Equals(Item.BigTrap))
         {
-            squaresType[numSquare] = SquareType.BigTrap;
+            squareTypes[squareNum] = SquareType.BigTrap;
         }
     }
 
-    public static void SetEmptySquare(int numSquare)
+    public static void SetEmptySquare(int squareNum)
     {
-        squaresType[numSquare] = SquareType.Empty;
+        squareTypes[squareNum] = SquareType.Empty;
     }
 }

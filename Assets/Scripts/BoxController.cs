@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class BoxController : MonoBehaviour {
+public class BoxController : MonoBehaviour
+{
 
     private Game game;
 

@@ -28,4 +28,6 @@ public class UI : MonoBehaviour {
         ShowTextMovements(true);
         textMovements.GetComponent<Text>().text = num.ToString();
     }
+
+
 }

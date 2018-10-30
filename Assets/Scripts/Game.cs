@@ -275,6 +275,7 @@ public class Game : MonoBehaviour
                 StartCoroutine(ChangeTurn());
             }
         }
+        GetCurrentPlayer().GetComponent<PlayerAnimator>().Stop();
     }
 
     public void SpotlightSlots(int slot, int direction)
@@ -348,6 +349,10 @@ public class Game : MonoBehaviour
 
         gameCamera.GetComponent<CameraController>().MoveCameraLookDestination(new Vector3(currentDice.transform.position.x, currentDice.transform.position.y + 30, currentDice.transform.position.z), currentDice);
 
+        if (GetCurrentPlayer().GetComponent<PlayerAnimator>() != null)
+        {
+            GetCurrentPlayer().GetComponent<PlayerAnimator>().Run();
+        }
     }
 
     public void ButtonNextSlot(int direction)

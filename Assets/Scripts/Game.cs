@@ -198,7 +198,7 @@ public class Game : MonoBehaviour
         if (diceType.Equals(DiceType.Dice16)) structure = diceStructure;
         else if (diceType.Equals(DiceType.Dice13)) structure = diceStructure13;
         else structure = diceStructure46;
-        currentDiceStructure = Instantiate(structure, GetCurrentPlayer().transform.position + (Vector3.up * 6), GetCurrentPlayer().transform.rotation);
+        currentDiceStructure = Instantiate(structure, GetCurrentPlayer().transform.position + (Vector3.up * 15), GetCurrentPlayer().transform.rotation);
 
         if (diceType.Equals(DiceType.Dice16)) currentDice = currentDiceStructure.transform.Find("Dice").gameObject;
         else if (diceType.Equals(DiceType.Dice13)) currentDice = currentDiceStructure.transform.Find("Dice13").gameObject;

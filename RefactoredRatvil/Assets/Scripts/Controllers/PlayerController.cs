@@ -3,6 +3,7 @@ using UnityEngine.AI;
 
 public class PlayerController : MonoBehaviour
 {
+    // this is the script which actually moves the player from A to B, it will get the path from the BoardManager then move the player
 
     private Animator animator;
 
@@ -20,30 +21,24 @@ public class PlayerController : MonoBehaviour
 
     private void Update()
     {
-        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        RaycastHit hit;
-
-        if (Input.GetMouseButtonDown(0))
+        if (Camera.main)
         {
+            // MOUSE ONLY - NEEDS TO BE CHANGED
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            RaycastHit hit;
 
-            if (Physics.Raycast(ray, out hit, 100))
+            if (Input.GetMouseButtonDown(0) && (Physics.Raycast(ray, out hit, 100)))
             {
                 navMeshAgent.destination = hit.point;
             }
-        }
 
-        if (navMeshAgent.remainingDistance <= navMeshAgent.stoppingDistance)
-        {
-            jogging = false;
-        }
-        else
-        {
-            jogging = true;
-        }
+            jogging = navMeshAgent.remainingDistance > navMeshAgent.stoppingDistance;
 
-        animator.SetBool("jog", jogging);
+            animator.SetBool("jog", jogging);
+        }
     }
 
+    // Add item on collision
     private void OnControllerColliderHit(ControllerColliderHit hit)
     {
         IInventoryItem item = hit.collider.GetComponent<IInventoryItem>();
